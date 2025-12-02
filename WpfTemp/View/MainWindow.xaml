@@ -1,0 +1,143 @@
+﻿<Window x:Class="WpfTemp.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfTemp"
+        xmlns:vm="clr-namespace:WpfTemp.ViewModel"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:materialDesignConverters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
+        mc:Ignorable="d"      
+        AutomationProperties.Name="{Binding Title, RelativeSource={RelativeSource Self}}"
+        Style="{StaticResource MaterialDesignWindow}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Title="Template" Width="1150" WindowStartupLocation="CenterScreen" WindowStyle="None" Loaded="MainWindow_OnLoaded">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Shadows.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ToggleButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        <materialDesign:DialogHost DialogTheme="Inherit" Identifier="RootDialog"
+                                   SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}">
+            <materialDesign:DrawerHost IsLeftDrawerOpen="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
+                <materialDesign:DrawerHost.LeftDrawerContent>
+                    <DockPanel MinWidth="220">
+                        <ToggleButton Margin="16"
+                                      HorizontalAlignment="Right"
+                                      DockPanel.Dock="Top"
+                                      IsChecked="{Binding ElementName=MenuToggleButton, Path=IsChecked, Mode=TwoWay}"
+                                      Style="{StaticResource MaterialDesignHamburgerToggleButton}" />
+                        <ListBox x:Name="ToggleItemsListBox"
+                                 Margin="0,16,0,16"
+                                 AutomationProperties.Name="DemoPagesListBox"
+                                 ItemsSource="{Binding ToggleItems}"
+                                 PreviewMouseLeftButtonUp="UIElement_OnPreviewMouseLeftButtonUp"
+                                 Style="{StaticResource MaterialDesignNavigationPrimaryListBox}"
+                                 SelectedIndex="{Binding SelectedIndex}"
+                                 SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}" >
+                            <ListBox.Resources>
+                                <Style TargetType="ScrollBar" BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" />
+                            </ListBox.Resources>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="24,4,0,4" AutomationProperties.AutomationId="ListItemPage" Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </materialDesign:DrawerHost.LeftDrawerContent>
+                <DockPanel>
+                    <materialDesign:ColorZone Padding="16" materialDesign:ElevationAssist.Elevation="Dp4" 
+                                              DockPanel.Dock="Top" Mode="PrimaryDark">
+                        <DockPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Horizontal" Grid.Column="0">
+                                    <ToggleButton x:Name="MenuToggleButton"
+                                                  AutomationProperties.Name="HamburgerToggleButton"
+                                                  IsChecked="False"
+                                                  Click="MenuToggleButton_OnClick"
+                                                  Style="{StaticResource MaterialDesignHamburgerToggleButton}" />
+
+                                    <Button Margin="24,0,0,0"
+                                            materialDesign:RippleAssist.Feedback="{Binding RelativeSource={RelativeSource Self}, Path=Foreground, Converter={x:Static materialDesignConverters:BrushRoundConverter.Instance}}"
+                                            Command="{Binding MovePrevCommand}"
+                                            Content="{materialDesign:PackIcon Kind=ArrowLeft,Size=24}"
+                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"
+                                            Style="{StaticResource MaterialDesignToolButton}"
+                                            ToolTip="Previous Item" />
+
+                                    <Button Margin="16,0,0,0"
+                                            materialDesign:RippleAssist.Feedback="{Binding RelativeSource={RelativeSource Self}, Path=Foreground, Converter={x:Static materialDesignConverters:BrushRoundConverter.Instance}}"
+                                            Command="{Binding MoveNextCommand}"
+                                            Content="{materialDesign:PackIcon Kind=ArrowRight,Size=24}"
+                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"
+                                            Style="{StaticResource MaterialDesignToolButton}"
+                                            ToolTip="Next Item" />
+
+                                    <Button Margin="16,0,0,0"
+                                            materialDesign:RippleAssist.Feedback="{Binding RelativeSource={RelativeSource Self}, Path=Foreground, Converter={x:Static materialDesignConverters:BrushRoundConverter.Instance}}"
+                                            Command="{Binding HomeCommand}"
+                                            Content="{materialDesign:PackIcon Kind=Home, Size=24}"
+                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"
+                                            Style="{StaticResource MaterialDesignToolButton}"
+                                            ToolTip="Home" />   
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Column="1">
+                                    <TextBlock Margin="200,0,200,0" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" AutomationProperties.Name="MainTittle"
+                                               FontSize="22" Text="{Binding MainTitle}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="2">
+                                    <TextBlock VerticalAlignment="Center" FontSize="12" Text="{Binding UserName}" />
+                                    <Button Margin="8,0,0,0"
+                                            materialDesign:RippleAssist.Feedback="{Binding RelativeSource={RelativeSource Self}, Path=Foreground, Converter={x:Static materialDesignConverters:BrushRoundConverter.Instance}}"
+                                            Command="{Binding ResizeCommand}"
+                                            Content="{materialDesign:PackIcon Kind=ArrowExpand, Size=24}"
+                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"
+                                            Style="{StaticResource MaterialDesignToolButton}"
+                                            ToolTip="Resize"/>
+                                    <Button Margin="8,0,0,0"
+                                            materialDesign:RippleAssist.Feedback="{Binding RelativeSource={RelativeSource Self}, Path=Foreground, Converter={x:Static materialDesignConverters:BrushRoundConverter.Instance}}"
+                                            Command="{Binding PowerCommand}"
+                                            Content="{materialDesign:PackIcon Kind=Power, Size=24}"
+                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"
+                                            Style="{StaticResource MaterialDesignToolButton}"
+                                            ToolTip="Shutdown"/>
+                                </StackPanel>
+                            </Grid>
+                        </DockPanel>
+                    </materialDesign:ColorZone>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <ScrollViewer x:Name="MainScrollViewer" Grid.Row="1"
+                                      materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True"
+                                      HorizontalScrollBarVisibility="{Binding SelectedItem.HorizontalScrollBarVisibilityRequirement, FallbackValue=Disabled}"
+                                      VerticalScrollBarVisibility="{Binding SelectedItem.VerticalScrollBarVisibilityRequirement, FallbackValue=Disabled}">
+                            <ContentControl Margin="{Binding MarginRequirement, FallbackValue=16}"
+                                            Content="{Binding Content, UpdateSourceTrigger=PropertyChanged, FallbackValue={x:Null}}"
+                                            DataContext="{Binding SelectedItem}"
+                                            DataContextChanged="OnSelectedItemChanged" />
+                        </ScrollViewer>
+                        <materialDesign:Snackbar x:Name="MainSnackbar"
+                                                 Grid.Row="1"
+                                                 MessageQueue="{materialDesign:MessageQueue}" />
+                    </Grid>
+                </DockPanel>
+            </materialDesign:DrawerHost>
+        </materialDesign:DialogHost>
+    </Grid>
+</Window>
