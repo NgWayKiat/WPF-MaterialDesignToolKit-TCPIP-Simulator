@@ -48,7 +48,7 @@ namespace WpfTemp.View
 
                     foreach (DataRow row in Global.dtVoltage.Rows)
                     {
-                        if (double.TryParse(row["ChVal0"].ToString(), out double val) && double.TryParse(row["ChVal1"].ToString(), out double val1))
+                        if (double.TryParse(row["ChVal0"].ToString(), out double val))
                         {
                             intlist.Add(val);
                             labellist.Add(row["DateTime"].ToString());

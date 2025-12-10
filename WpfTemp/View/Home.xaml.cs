@@ -23,20 +23,27 @@ namespace WpfTemp.View
     public partial class Home : UserControl
     {
         private HomeViewModel viewModel;
-        private TcpClientModel objTcpClientModel = new TcpClientModel();
 
         public Home()
         {
             InitializeComponent();
             viewModel = new HomeViewModel();
             DataContext = viewModel;
-            viewModel.TcpClientModel.Client_Ip = "10.60.144.84";
-            viewModel.TcpClientModel.Client_Port = 9999;
+            viewModel.Client_Ip = Global.sClientIp;
+            viewModel.Client_Port = Global.iClientPort;
         }
 
-        private void BtnSave_OnClick(object sender, RoutedEventArgs e)
+        private void NumericTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            viewModel.OpenDrawers.LeftDrawer = false;
+            // Allow only numeric input (0-9)
+            foreach (char c in e.Text)
+            {
+                if (!char.IsDigit(c))
+                {
+                    e.Handled = true; // Prevent non-digit input
+                    return;
+                }
+            }
         }
     }
 }

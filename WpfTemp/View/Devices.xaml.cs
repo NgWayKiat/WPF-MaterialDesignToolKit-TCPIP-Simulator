@@ -27,7 +27,6 @@ namespace WpfTemp.View
         {
             InitializeComponent();
             DataContext = new DeviceViewModel();
-
             Thread connectThread = new Thread(() => { MCC118_VOLTAGE(); });
             connectThread.Start();
         }
@@ -86,6 +85,10 @@ namespace WpfTemp.View
                     {
                         // Code that modifies the UI element
                         DataContext = deviceViewModel;
+                        if (deviceViewModel.MCCINFO == null)
+                        {
+                            deviceViewModel.MCCINFO = $"MCC118 (IP Address: {Global.sClientIp}  Port: {Global.iClientPort.ToString()})";
+                        }
                         deviceViewModel.CH0_VAL = value[0];
                         deviceViewModel.CH1_VAL = value[1];
                         deviceViewModel.CH2_VAL = value[2];
@@ -115,6 +118,10 @@ namespace WpfTemp.View
                     Dispatcher.Invoke(() => {
                         // Code that modifies the UI element
                         DataContext = deviceViewModel;
+                        if (deviceViewModel.MCCINFO == null)
+                        {
+                            deviceViewModel.MCCINFO = $"MCC118 (IP Address: {Global.sClientIp}  Port: {Global.iClientPort.ToString()})";
+                        }
                         deviceViewModel.CH0_VAL = "0";
                         deviceViewModel.CH1_VAL = "0";
                         deviceViewModel.CH2_VAL = "0";

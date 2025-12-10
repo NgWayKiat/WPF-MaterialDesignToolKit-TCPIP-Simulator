@@ -12,7 +12,7 @@
         Style="{StaticResource MaterialDesignWindow}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Title="Template" Width="1150" WindowStartupLocation="CenterScreen" WindowStyle="None" Loaded="MainWindow_OnLoaded">
+        Title="BIOSG" Width="1150" WindowStartupLocation="CenterScreen" WindowStyle="None" Loaded="MainWindow_OnLoaded">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

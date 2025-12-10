@@ -28,8 +28,7 @@
 
     <StackPanel>
         <TextBlock Style="{StaticResource PageTitleTextBlock}" Text="DEVICE" />
-        <TextBlock Style="{StaticResource PageSectionTitleTextBlock}" Text="MCC118"></TextBlock>
-
+        <TextBlock Style="{StaticResource PageSectionTitleTextBlock}" Text="{Binding MCCINFO, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBlock>
         <DockPanel HorizontalAlignment="Left" >
             <TextBox x:Name="txtCH0_VOL"  Width="100" Margin="8,0,0,0" VerticalAlignment="Bottom" materialDesign:HintAssist.Hint="CH0_VOL" IsReadOnly="True"
                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" Text="{Binding CH0_VAL, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
@@ -47,6 +46,11 @@
                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" Text="{Binding CH6_VAL, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBox x:Name="txtCH7_VOL"  Width="100" Margin="8,0,0,0" VerticalAlignment="Bottom" materialDesign:HintAssist.Hint="CH7_VOL" IsReadOnly="True"
                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" Text="{Binding CH7_VAL, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        </DockPanel>
+        <DockPanel HorizontalAlignment="Left" Margin="10">
+            <Grid DockPanel.Dock="Bottom">
+                
+            </Grid>
         </DockPanel>
     </StackPanel>
 </UserControl>

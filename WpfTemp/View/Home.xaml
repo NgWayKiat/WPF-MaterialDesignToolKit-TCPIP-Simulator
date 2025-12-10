@@ -39,16 +39,24 @@
                     <StackPanel Width="300" Cursor="" Orientation="Vertical">
                         <DockPanel Style="{StaticResource FieldDockPanel}" HorizontalAlignment="Left">
                             <TextBox x:Name="txtClientIp" MaxLength="15" Width="150" Margin="10,10,0,0" VerticalAlignment="Bottom" materialDesign:HintAssist.Hint="IP Adress"
-                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}" Text="{Binding TcpClientModel.Client_Ip, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}" Text="{Binding Client_Ip, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </DockPanel>
                         <DockPanel Style="{StaticResource FieldDockPanel}" HorizontalAlignment="Left">
-                            <TextBox x:Name="txtClientPort" MaxLength="4" Width="150" Margin="10,10,0,0" VerticalAlignment="Bottom" materialDesign:HintAssist.Hint="Port Address"
-                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}" Text="{Binding TcpClientModel.Client_Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBox x:Name="txtClientPort"  MaxLength="4" Width="150" InputScope="Number" PreviewTextInput="NumericTextBox_PreviewTextInput" Margin="10,10,0,0" VerticalAlignment="Bottom" materialDesign:HintAssist.Hint="Port Address"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}" Text="{Binding Client_Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </DockPanel>
-                        
-                        <Button Content="{materialDesign:PackIcon ContentSave}"
-                                IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
-                                ToolTip="Save" Width="80" Margin="0,10" Click="BtnSave_OnClick"/>
+
+                        <DockPanel HorizontalAlignment="Right" Margin="0,0,100,0">
+                            <Button Content="{materialDesign:PackIcon Kind=ContentSave,Size=24}"
+                                    Command="{Binding SaveCommand}"
+                                    DockPanel.Dock="Right" 
+                                    ToolTip="Save" Width="60" Margin="10,10"/>
+
+                            <Button Content="{materialDesign:PackIcon Kind=SettingsRefresh,Size= 24}"
+                                    Command="{Binding ResetCommand}"
+                                    DockPanel.Dock="Right"
+                                    ToolTip="Reset" Width="60" Margin="10,10"/>
+                        </DockPanel>
                     </StackPanel>
                 </ContentControl>
             </materialDesign:DrawerHost.LeftDrawerContent>
@@ -59,7 +67,7 @@
                                 Margin="8 0 0 0"
                                 Command="{Binding ExecuteCommand}"
                                 CommandParameter="OpenLeftDrawer"
-                                IsEnabled="{Binding TcpClientModel.IsReadyConnected}"
+                                IsEnabled="{Binding IsReadyConnected}"
                                 Content="{materialDesign:PackIcon Kind=Cog,Size=24}"
                                 Cursor="Hand"
                                 ToolTip="Setting"
@@ -68,8 +76,8 @@
                         
                         <Button materialDesign:RippleAssist.Feedback="{Binding RelativeSource={RelativeSource Self}, Path=Foreground, Converter={x:Static materialDesignConverters:BrushRoundConverter.Instance}}"
                                 Margin="8 0 0 0"
-                                Command="{Binding TcpClientModel.ConnectCommand}"
-                                IsEnabled="{Binding TcpClientModel.IsReadyConnected}"
+                                Command="{Binding ConnectCommand}"
+                                IsEnabled="{Binding IsReadyConnected}"
                                 Content="{materialDesign:PackIcon Kind=CogPlay,Size=24}"
                                 Cursor="Hand"
                                 DockPanel.Dock="Left" 
@@ -78,8 +86,8 @@
                         
                         <Button materialDesign:RippleAssist.Feedback="{Binding RelativeSource={RelativeSource Self}, Path=Foreground, Converter={x:Static materialDesignConverters:BrushRoundConverter.Instance}}"
                                 Margin="8 0 0 0"
-                                Command="{Binding TcpClientModel.DisconnectCommand}"
-                                IsEnabled="{Binding TcpClientModel.IsConnected}"
+                                Command="{Binding DisconnectCommand}"
+                                IsEnabled="{Binding IsConnected}"
                                 Content="{materialDesign:PackIcon Kind=CogStop,Size=24}"
                                 Cursor="Hand"
                                 ToolTip="Stop"
@@ -88,11 +96,11 @@
                         
                         <Button materialDesign:RippleAssist.Feedback="{Binding RelativeSource={RelativeSource Self}, Path=Foreground, Converter={x:Static materialDesignConverters:BrushRoundConverter.Instance}}"
                                 Margin="8 0 0 0"
-                                Command="{Binding TcpClientModel.ClearCommand}"
+                                Command="{Binding ClearCommand}"
                                 Content="{materialDesign:PackIcon Kind=Delete,Size=24}"
                                 Cursor="Hand"
                                 DockPanel.Dock="Left" 
-                                ToolTip="Clear All"
+                                ToolTip="Clear Log"
                                 Style="{StaticResource MaterialDesignFloatingActionMiniButton}"/>
                     </DockPanel>
                 </Grid>
@@ -100,11 +108,11 @@
                 <Expander Margin="4" Background="White" DockPanel.Dock="Bottom" ExpandDirection="Up" IsExpanded="True">
                     <Expander.Header>
                         <DockPanel Grid.Row="1" Height="30" DockPanel.Dock="Bottom" LastChildFill="False">
-                            <Rectangle Width="10" Height="10" Fill="{ Binding TcpClientModel.Connected }" Margin="5"/>
+                            <Rectangle Width="10" Height="10" Fill="{ Binding Connected }" Margin="5"/>
                             <TextBlock VerticalAlignment="Center" Text="IP：" />
-                            <TextBlock VerticalAlignment="Center" Text="{Binding TcpClientModel.Client_Ip}" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Client_Ip}" />
                             <TextBlock VerticalAlignment="Center" Text="   Port：" />
-                            <TextBlock VerticalAlignment="Center" Text="{Binding TcpClientModel.Client_Port}" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Client_Port}" />
                         </DockPanel>
                     </Expander.Header>
                     <Border Background="{DynamicResource RegionBrush}"
@@ -113,20 +121,28 @@
                             CornerRadius="4,4,0,0"> 
                         <DockPanel DockPanel.Dock="Bottom">
                             <DockPanel DockPanel.Dock="Top" LastChildFill="False">
-                                <Button Width="100" Margin="4"
-                                        Command="{Binding TcpClientModel.SendCommand}"
-                                        Content="Send" DockPanel.Dock="Right" />
+                                <Button Width="100" Margin="5"
+                                        Command="{Binding SendCommand}"
+                                        DockPanel.Dock="Right" 
+                                        Content="Send"
+                                        Style="{StaticResource MaterialDesignFlatMidBgButton}"/>     
+                                
+                                <Button Width="100" Margin="5"
+                                        Command="{Binding ExecuteCommand}"
+                                        CommandParameter="ClearTextBox"
+                                        Content="Clear" DockPanel.Dock="Right" 
+                                        Style="{StaticResource MaterialDesignFlatMidBgButton}"/>                                   
                             </DockPanel>
                             <ContentControl Margin="4,0" Padding="0">
                                 <TextBox MinHeight="100" MaxHeight="250" VerticalContentAlignment="Top"
                                          AcceptsReturn="True"
                                          materialDesign:HintAssist.Hint="Send Message"
                                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                         Text="{Binding TcpClientModel.SendInput, UpdateSourceTrigger=PropertyChanged}"
+                                         Text="{Binding SendInput, UpdateSourceTrigger=PropertyChanged}"
                                          TextWrapping="Wrap">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter"
-                                                    Command="{Binding TcpClientModel.SendCommand}"/>
+                                                    Command="{Binding SendCommand}"/>
                                     </TextBox.InputBindings>
                                 </TextBox>
                             </ContentControl>
@@ -135,8 +151,8 @@
                 </Expander>
 
                 <Border Margin="5" BorderBrush="Blue" Background="White" CornerRadius="4">
-                    <ScrollViewer>
-                        <ItemsControl Background="{DynamicResource BackgroundBrush}" ItemsSource="{Binding TcpClientModel.Messages}">
+                    <ScrollViewer x:Name="svTCPIP">
+                        <ItemsControl Background="{DynamicResource BackgroundBrush}" ItemsSource="{Binding Messages}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel />
