@@ -12,6 +12,7 @@ namespace WpfTemp.ViewModel
 {
     public partial class DeviceViewModel : ViewModelBase
     {
+        private string? _MCCINFO;
         private string? _CH0_VAL;
         private string? _CH1_VAL;
         private string? _CH2_VAL;
@@ -67,6 +68,12 @@ namespace WpfTemp.ViewModel
         {
             get => _CH7_VAL;
             set => SetProperty(ref _CH7_VAL, value);
+        }
+
+        public string MCCINFO
+        {
+            get => _MCCINFO;
+            set => SetProperty(ref _MCCINFO, value);
         }
     }
 

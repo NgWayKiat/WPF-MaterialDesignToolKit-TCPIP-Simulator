@@ -36,7 +36,8 @@ namespace WpfTemp.ViewModel
             ToggleItems = [
                             new ViewContent("HOME", typeof(Home)), 
                             new ViewContent("DEVICE", typeof(Devices)),
-                            new ViewContent("CHART", typeof(Chart))
+                            new ViewContent("CHART", typeof(Chart)),
+                            new ViewContent("ECMAIN", typeof(ECMain))
                         ];
             SelectedItem = ToggleItems.First();
         }
