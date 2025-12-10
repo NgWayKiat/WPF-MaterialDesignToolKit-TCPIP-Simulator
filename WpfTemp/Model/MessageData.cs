@@ -44,6 +44,14 @@ namespace WpfTemp.Model
             {
                 this.FColor = Brushes.Red;
             }
+            else if (Type == Global.MessageType.RECV)
+            {
+                this.FColor = Brushes.DarkGreen;
+            }
+            else if (Type == Global.MessageType.SEND)
+            {
+                this.FColor = Brushes.DarkBlue;
+            }
         }
 
     }

@@ -1,54 +1,35 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Threading;
-using static WpfTemp.Model.Global;
-
 
 namespace WpfTemp.Model
 {
     public partial class TcpClientModel : ObservableObject
     {
-        private TcpClient tcpClient;
+        private AsyncCallback sendCallback = null;
 
-        private NetworkStream networkStream;
+        public event EventHandler<PrimaryInEventArgs> DataReceived;
 
-        [ObservableProperty]
-        string? _Client_Ip = "127.0.0.1";
+        public event EventHandler<PrimaryOutEventArgs> DataSent;
 
-        [ObservableProperty]
-        int _Client_Port = 8888;
+        public TcpClient tcpClient;
 
-        [ObservableProperty] 
-        string _SendInput = string.Empty;
+        public NetworkStream networkStream;
 
-        [ObservableProperty]
-        Brush _Connected = Brushes.Red;
-
-        [ObservableProperty]
-        bool _IsConnected = false;
-
-        [ObservableProperty]
-        bool _IsReadyConnected = true;
-
-        [ObservableProperty]
-        ObservableCollection<MessageData> _Messages = [];
-
-        [RelayCommand]
-        private void Clear()
+        public bool IsConnected
         {
-            Application.Current.Dispatcher.Invoke(delegate
+            get
             {
-                Messages.Clear();
-            });
+                return tcpClient != null && tcpClient.Connected;
+            }
         }
 
-        [RelayCommand]
-        private async Task Connect()
+        public string Client_Ip { get; set; } = Global.sClientIp;
+        public int Client_Port { get; set; } = Global.iClientPort;
+
+        public async Task Connect()
         {
             try
             {
@@ -57,69 +38,42 @@ namespace WpfTemp.Model
                     return;
                 }
                 tcpClient = new TcpClient();
-                ShowMessage("Start TCP/IP connection...");
                 await tcpClient.ConnectAsync(Client_Ip, Client_Port);
                 networkStream = tcpClient.GetStream();
-                ShowMessage($"TCP/IP Connected Client Server:{Client_Ip}:{Client_Port}  Client:{tcpClient.Client.LocalEndPoint}");
-                IsConnected = tcpClient.Connected;
-                IsReadyConnected = false;
-                Connected = Brushes.Green;
-                StartReceiving();
+
+                _ = StartReceiving();
             }
             catch (Exception ex)
             {
-                ShowErrorMessage ($"Connect Error: {ex.Message}");
+                await Task.FromException(ex);
             }
         }
 
-        [RelayCommand]
-        private void Disconnect()
+        public void Disconnect()
         {
-            try
-            {
-                networkStream?.Close();
-                tcpClient?.Close();
-                ShowWarningMessage($"TCP/IP Disconnected Client Server:{Client_Ip}:{Client_Port}");
-                IsConnected = false;
-                IsReadyConnected = true;
-                Connected = Brushes.Red;
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage ($"Disconnect Error: {ex.Message}");
-            }
+            networkStream?.Close();
+            tcpClient?.Close();
         }
 
-        [RelayCommand]
-        public async Task Send()
+        public Task Send(string sMsg)
         {
-            if (tcpClient == null || !tcpClient.Connected)
-            {
-                Connected = Brushes.Red;
-                await Connect();
-                if (!IsConnected)
-                {
-                    return;
-                }
-            }
-
             try {
-                string message = SendInput;
-
-                byte[] utf8Data = Encoding.UTF8.GetBytes(message);
+                byte[] utf8Data = Encoding.UTF8.GetBytes(sMsg);
                 networkStream.Write(utf8Data, 0, utf8Data.Length);
-                ShowMessage($"Sent Data: {message}");
             }
             catch (Exception ex)
             {
-                ShowErrorMessage ($"Send Error: {ex.Message}");
                 Disconnect();
+                return Task.FromException(ex);
             }
+
+            return Task.CompletedTask;
         }
 
-        private async void StartReceiving()
+        private async Task StartReceiving()
         {
             byte[] buffer = new byte[1024];
+            string utf8Data = string.Empty;
 
             try
             {
@@ -131,46 +85,45 @@ namespace WpfTemp.Model
                     {
                         networkStream?.Close();
                         tcpClient?.Close();
-                        IsConnected = false;
-                        IsReadyConnected = true;
-                        Connected = Brushes.Red;
-                        ShowErrorMessage("Connection closed by the server.");
-                        break;
+                        utf8Data = "CLOSE_CONNECTION";
+                    }
+                    else
+                    {
+                        var receivedBuffer = buffer.Take(bytesRead).ToArray();
+                        utf8Data = Encoding.UTF8.GetString(receivedBuffer);
                     }
 
-                    var receivedBuffer = buffer.Take(bytesRead).ToArray();
-                    string utf8Data = Encoding.UTF8.GetString(receivedBuffer);
-                    ShowMessage($"Received Data: {utf8Data}");
+                    OnDataReceived(utf8Data);
                 }
             }
             catch (Exception ex)
             {
                 if (tcpClient.Connected)
                 {
-                    ShowErrorMessage ($"Receive Error: {ex.Message}");
                     Disconnect();
                 }
             }
         }
 
-        protected void ShowErrorMessage(string message) => ShowMessage(message, MessageType.ERRS);
-
-        protected void ShowWarningMessage(string message) => ShowMessage(message, MessageType.WARN);
-
-        protected void ShowMessage(string message, MessageType type = MessageType.INFO, string title = "")
+        protected virtual void OnDataReceived(string data)
         {
-            try
+            // Raise the event on the UI thread in WPF
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Application.Current.Dispatcher.Invoke(delegate
-                {
-                    Messages.Add(new MessageData($"{message}", DateTime.Now, type, title));
-                    while (Messages.Count > 100)
-                    {
-                        Messages.RemoveAt(0);
-                    }
-                });
-            }
-            catch (Exception) { }
+                DataReceived?.Invoke(this, new PrimaryInEventArgs(data));
+            });
         }
+    }
+
+    public partial class PrimaryInEventArgs : EventArgs
+    {
+        public string Data { get; }
+        public PrimaryInEventArgs(string data) => Data = data;
+    }
+
+    public partial class PrimaryOutEventArgs : EventArgs
+    {
+        public string Data { get; }
+        public PrimaryOutEventArgs(string data) => Data = data;
     }
 }
